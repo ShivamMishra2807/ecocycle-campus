@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #f4f6fc;
+    --bg-card: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --brand-emerald: #10b981;
+    --brand-emerald-dark: #059669;
+    --brand-cyan: #06b6d4;
+    --brand-amber: #f59e0b;
+    --brand-purple: #8b5cf6;
+    --brand-rose: #f43f5e;
+    --border-color: #cbd5e1;
+    --panel-bg: rgba(255, 255, 255, 0.95);
+    --card-bg: #ffffff;
+    --input-bg: #f8fafc;
+    --input-border: #cbd5e1;
+    --input-text: #0f172a;
+  }
+
+  .dark {
+    --bg-primary: #090e1a;
+    --bg-card: #131c2e;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --brand-emerald: #10b981;
+    --brand-emerald-dark: #059669;
+    --brand-cyan: #06b6d4;
+    --brand-amber: #f59e0b;
+    --brand-purple: #a855f7;
+    --brand-rose: #f43f5e;
+    --border-color: #1e293b;
+    --panel-bg: rgba(19, 28, 46, 0.95);
+    --card-bg: #131c2e;
+    --input-bg: #090e1a;
+    --input-border: #334155;
+    --input-text: #ffffff;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+.glass-panel {
+  background: var(--panel-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.bright-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.bright-card:hover {
+  border-color: var(--brand-emerald);
+}
+
+.custom-input {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--input-text);
+}
+
+.bright-gradient-emerald {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.bright-gradient-cyan {
+  background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
+}
+
+.bright-gradient-amber {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.bright-gradient-purple {
+  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+}
+
+.bright-gradient-rose {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}

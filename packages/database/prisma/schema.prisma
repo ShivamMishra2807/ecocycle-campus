@@ -1,0 +1,413 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum Role {
+  STUDENT
+  FACULTY
+  STAFF
+  VOLUNTEER
+  TECHNICIAN
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum DeviceCategory {
+  LAPTOP
+  DESKTOP
+  MOBILE
+  TABLET
+  MONITOR
+  PRINTER
+  PROJECTOR
+  KEYBOARD
+  MOUSE
+  ROUTER
+  SERVER
+  HARD_DRIVE
+  BATTERY
+  CABLE
+  OTHER
+}
+
+enum DeviceCondition {
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
+  DAMAGED
+  NON_FUNCTIONAL
+}
+
+enum DeviceStatus {
+  REPORTED
+  COLLECTION_PENDING
+  COLLECTED
+  UNDER_ASSESSMENT
+  REPAIR_REQUIRED
+  UNDER_REPAIR
+  REFURBISHED
+  AVAILABLE_FOR_REUSE
+  ALLOCATED
+  SENT_FOR_RECYCLING
+  RECYCLED
+}
+
+enum CollectionStatus {
+  REQUESTED
+  SCHEDULED
+  ASSIGNED
+  PICKED_UP
+  RECEIVED
+  CANCELLED
+}
+
+enum RecommendedAction {
+  REPAIR
+  REFURBISH
+  REUSE_DIRECTLY
+  PARTS_RECOVERY
+  RECYCLE
+}
+
+enum RepairStatus {
+  OPEN
+  DIAGNOSING
+  WAITING_FOR_PARTS
+  IN_PROGRESS
+  QUALITY_CHECK
+  COMPLETED
+  CANCELLED
+}
+
+enum ListingStatus {
+  AVAILABLE
+  RESERVED
+  ALLOCATED
+  REMOVED
+}
+
+enum ReuseRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ACTION_REQUIRED
+  SYSTEM
+}
+
+model User {
+  id             String      @id @default(uuid())
+  name           String
+  email          String      @unique
+  passwordHash   String
+  phone          String?
+  role           Role        @default(STUDENT)
+  departmentId   String?
+  department     Department? @relation(fields: [departmentId], references: [id])
+  avatarUrl      String?
+  isActive       Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  devicesOwned        Device[]            @relation("DeviceOwner")
+  submissions         EwasteSubmission[]
+  uploadedImages      DeviceImage[]
+  assignedCollections CollectionRequest[] @relation("AssignedVolunteer")
+  collectionsRequested CollectionRequest[] @relation("RequestedUser")
+  assessmentsDone     Assessment[]        @relation("AssessedTechnician")
+  repairsAssigned     RepairTicket[]      @relation("RepairTechnician")
+  repairUpdates       RepairUpdate[]      @relation("UpdateTechnician")
+  reuseListings       ReuseListing[]      @relation("ListedByUser")
+  reuseRequests       ReuseRequest[]      @relation("RequesterUser")
+  reviewedRequests    ReuseRequest[]      @relation("ReviewerUser")
+  allocationsMade     DeviceAllocation[]  @relation("AllocatedByUser")
+  allocationsReceived DeviceAllocation[]  @relation("AllocatedToUser")
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  code      String   @unique
+  building  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users         User[]
+  devices       Device[]
+  reuseRequests ReuseRequest[]
+  allocations   DeviceAllocation[]
+}
+
+model Device {
+  id                  String          @id @default(uuid())
+  assetNumber         String          @unique
+  category            DeviceCategory
+  brand               String
+  model               String
+  serialNumber        String?
+  purchaseYear        Int?
+  estimatedAge        Int?
+  condition           DeviceCondition
+  status              DeviceStatus    @default(REPORTED)
+  ownerId             String?
+  owner               User?           @relation("DeviceOwner", fields: [ownerId], references: [id])
+  currentDepartmentId String?
+  currentDepartment   Department?     @relation(fields: [currentDepartmentId], references: [id])
+  currentLocation     String?
+  estimatedWeight     Float           @default(1.0)
+  imageUrl            String?
+  description         String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  images             DeviceImage[]
+  ewasteSubmissions  EwasteSubmission[]
+  assessments        Assessment[]
+  repairTickets      RepairTicket[]
+  reuseListings      ReuseListing[]
+  allocations        DeviceAllocation[]
+  recyclingRecords   RecyclingRecord[]
+}
+
+model EwasteSubmission {
+  id                      String            @id @default(uuid())
+  userId                  String
+  user                    User              @relation(fields: [userId], references: [id])
+  deviceId                String
+  device                  Device            @relation(fields: [deviceId], references: [id])
+  reason                  String
+  description             String?
+  preferredCollectionDate DateTime?
+  collectionPointId       String?
+  collectionPoint        CollectionPoint?  @relation(fields: [collectionPointId], references: [id])
+  status                  CollectionStatus  @default(REQUESTED)
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+
+  collectionRequests CollectionRequest[]
+}
+
+model DeviceImage {
+  id         String   @id @default(uuid())
+  deviceId   String
+  device     Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  url        String
+  publicId   String?
+  uploadedBy String?
+  uploader   User?    @relation(fields: [uploadedBy], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+model CollectionPoint {
+  id             String   @id @default(uuid())
+  name           String
+  building       String
+  floor          String?
+  room           String?
+  latitude       Float?
+  longitude      Float?
+  operatingHours String   @default("9:00 AM - 5:00 PM")
+  capacity       Int      @default(100)
+  currentLoad    Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  submissions EwasteSubmission[]
+  collections CollectionRequest[]
+}
+
+model CollectionRequest {
+  id                  String            @id @default(uuid())
+  submissionId        String
+  submission          EwasteSubmission  @relation(fields: [submissionId], references: [id])
+  requestedById       String
+  requestedBy         User              @relation("RequestedUser", fields: [requestedById], references: [id])
+  assignedVolunteerId String?
+  assignedVolunteer   User?             @relation("AssignedVolunteer", fields: [assignedVolunteerId], references: [id])
+  collectionPointId   String?
+  collectionPoint     CollectionPoint?  @relation(fields: [collectionPointId], references: [id])
+  scheduledAt         DateTime?
+  collectedAt         DateTime?
+  status              CollectionStatus  @default(REQUESTED)
+  notes               String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+}
+
+model Assessment {
+  id                   String            @id @default(uuid())
+  deviceId             String
+  device               Device            @relation(fields: [deviceId], references: [id])
+  technicianId         String
+  technician           User              @relation("AssessedTechnician", fields: [technicianId], references: [id])
+  physicalCondition    DeviceCondition
+  functionalCondition  DeviceCondition
+  repairability        Int               @default(3)
+  estimatedRepairCost  Float?
+  estimatedReuseValue Float?
+  recommendedAction    RecommendedAction
+  diagnosis            String
+  notes                String?
+  assessedAt           DateTime          @default(now())
+}
+
+model RepairTicket {
+  id                  String       @id @default(uuid())
+  deviceId            String
+  device              Device       @relation(fields: [deviceId], references: [id])
+  technicianId        String?
+  technician          User?        @relation("RepairTechnician", fields: [technicianId], references: [id])
+  issue               String
+  diagnosis           String?
+  priority            String       @default("MEDIUM")
+  estimatedCost       Float?
+  actualCost          Float?
+  estimatedCompletion DateTime?
+  completedAt         DateTime?
+  status              RepairStatus @default(OPEN)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  updates RepairUpdate[]
+  parts   RepairPart[]
+}
+
+model RepairUpdate {
+  id             String       @id @default(uuid())
+  repairTicketId String
+  repairTicket   RepairTicket @relation(fields: [repairTicketId], references: [id], onDelete: Cascade)
+  technicianId   String
+  technician     User         @relation("UpdateTechnician", fields: [technicianId], references: [id])
+  status         RepairStatus
+  message        String
+  createdAt      DateTime     @default(now())
+}
+
+model Part {
+  id           String   @id @default(uuid())
+  name         String
+  partNumber   String   @unique
+  category     String
+  quantity     Int      @default(0)
+  minimumStock Int      @default(5)
+  unitCost     Float    @default(0.0)
+  supplier     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  repairParts RepairPart[]
+}
+
+model RepairPart {
+  id             String       @id @default(uuid())
+  repairTicketId String
+  repairTicket   RepairTicket @relation(fields: [repairTicketId], references: [id], onDelete: Cascade)
+  partId         String
+  part           Part         @relation(fields: [partId], references: [id])
+  quantity       Int          @default(1)
+  cost           Float        @default(0.0)
+  createdAt      DateTime     @default(now())
+}
+
+model ReuseListing {
+  id             String        @id @default(uuid())
+  deviceId       String
+  device         Device        @relation(fields: [deviceId], references: [id])
+  listedById     String
+  listedBy       User          @relation("ListedByUser", fields: [listedById], references: [id])
+  title          String
+  description    String
+  condition      DeviceCondition
+  specifications String?
+  availability   ListingStatus @default(AVAILABLE)
+  listedAt       DateTime      @default(now())
+  allocatedAt    DateTime?
+
+  requests ReuseRequest[]
+}
+
+model ReuseRequest {
+  id           String             @id @default(uuid())
+  listingId    String
+  listing      ReuseListing       @relation(fields: [listingId], references: [id])
+  requesterId  String
+  requester    User               @relation("RequesterUser", fields: [requesterId], references: [id])
+  departmentId String?
+  department   Department?        @relation(fields: [departmentId], references: [id])
+  reason       String
+  status       ReuseRequestStatus @default(PENDING)
+  requestedAt  DateTime           @default(now())
+  reviewedAt   DateTime?
+  reviewedById String?
+  reviewedBy   User?              @relation("ReviewerUser", fields: [reviewedById], references: [id])
+}
+
+model DeviceAllocation {
+  id                   String      @id @default(uuid())
+  deviceId             String
+  device               Device      @relation(fields: [deviceId], references: [id])
+  userId               String?
+  user                 User?       @relation("AllocatedToUser", fields: [userId], references: [id])
+  departmentId         String?
+  department           Department? @relation(fields: [departmentId], references: [id])
+  allocatedById        String
+  allocatedBy          User        @relation("AllocatedByUser", fields: [allocatedById], references: [id])
+  allocatedAt          DateTime    @default(now())
+  returnedAt           DateTime?
+  conditionAtAllocation DeviceCondition
+  conditionAtReturn    DeviceCondition?
+  notes                String?
+}
+
+model RecyclingRecord {
+  id                         String   @id @default(uuid())
+  deviceId                   String
+  device                     Device   @relation(fields: [deviceId], references: [id])
+  recyclerName               String
+  recyclerRegistrationNumber String
+  recyclingDate              DateTime @default(now())
+  weightKg                   Float
+  certificateNumber          String   @unique
+  certificateUrl             String?
+  method                     String   @default("Zero-Landfill Hydro/Pyrometallurgical E-Waste Recycling")
+  notes                      String?
+  createdAt                  DateTime @default(now())
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  metadata  String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+}

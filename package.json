@@ -1,0 +1,24 @@
+{
+  "name": "ecocycle-campus-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "EcoCycle Campus - Campus E-Waste Collection, Repair, Reuse & Recycling Platform",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev:web",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "build:api": "npm run build --workspace=apps/api",
+    "build:web": "npm run build --workspace=apps/web",
+    "build": "npm run build --workspace=packages/shared && npm run db:generate --workspace=packages/database && npm run build:api && npm run build:web",
+    "db:generate": "npm run db:generate --workspace=packages/database",
+    "db:push": "npm run db:push --workspace=packages/database",
+    "db:seed": "npm run db:seed --workspace=packages/database"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}
