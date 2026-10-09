@@ -282,12 +282,5 @@ Contributions are welcome! To contribute:
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
----
 
-## 📄 License
 
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
-
-<div align="center">
-  <sub>Built with 💚 for campus sustainability and zero-waste initiatives.</sub>
-</div>
