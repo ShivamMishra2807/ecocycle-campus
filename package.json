@@ -13,12 +13,15 @@
     "dev:web": "npm run dev --workspace=apps/web",
     "build:api": "npm run build --workspace=apps/api",
     "build:web": "npm run build --workspace=apps/web",
+    "build:server": "npm run build --workspace=packages/shared && npm run db:generate --workspace=packages/database && npm run db:push --workspace=packages/database && npm run build:api",
     "build": "npm run build --workspace=packages/shared && npm run db:generate --workspace=packages/database && npm run build:api && npm run build:web",
     "db:generate": "npm run db:generate --workspace=packages/database",
     "db:push": "npm run db:push --workspace=packages/database",
     "db:seed": "npm run db:seed --workspace=packages/database"
   },
-  "devDependencies": {
+  "dependencies": {
+    "prisma": "^6.4.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
   }
 }

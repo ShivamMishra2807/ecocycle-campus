@@ -4,9 +4,8 @@ services:
     runtime: node
     plan: free
     region: oregon
-    buildCommand: npm install && npm run build --workspace=packages/shared && npm run db:generate --workspace=packages/database && npm run db:push --workspace=packages/database && npm run db:seed --workspace=packages/database && npm run build --workspace=apps/api
+    buildCommand: npm install --include=dev && npm run build:server
     startCommand: npm run start --workspace=apps/api
-    healthCheckPath: /api/v1/health
     envVars:
       - key: NODE_ENV
         value: production
