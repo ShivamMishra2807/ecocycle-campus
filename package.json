@@ -20,6 +20,7 @@
     "db:seed": "npm run db:seed --workspace=packages/database"
   },
   "dependencies": {
+    "@types/node": "^22.10.2",
     "prisma": "^6.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
