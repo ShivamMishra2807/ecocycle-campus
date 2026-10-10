@@ -14,7 +14,7 @@
 
 <br/>
 
-**[🌐 Live Demo (GitHub Pages)](https://shivamishra2807.github.io/ecocycle-campus/)** • **[📖 API Documentation](http://localhost:5000/api/docs)** • **[🐛 Report Issue](https://github.com/ShivamMishra2807/ecocycle-campus/issues)**
+**[🌐 Live Demo](https://shivammishra2807.github.io/ecocycle-campus/)** • **[⚡ Deploy on Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FShivamMishra2807%2Fecocycle-campus&root-directory=apps%2Fweb)** • **[🚀 Deploy Backend on Render](https://render.com/deploy?repo=https://github.com/ShivamMishra2807/ecocycle-campus)** • **[📖 API Documentation](http://localhost:5000/api/docs)**
 
 </div>
 
