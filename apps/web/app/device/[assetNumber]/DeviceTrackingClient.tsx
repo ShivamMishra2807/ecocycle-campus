@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { fetchApi } from '@/lib/api';
 import { QrCode, CheckCircle2, Clock, Wrench, RefreshCw, ShieldCheck, MapPin, User, ArrowLeft, AlertCircle } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function DeviceTrackingClient({ assetNumber }: { assetNumber: string }) {
   const [device, setDevice] = useState<any>(null);
@@ -117,13 +118,14 @@ export default function DeviceTrackingClient({ assetNumber }: { assetNumber: str
 
         {/* QR Code Card */}
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-2 shadow-sm">
-          {device?.qrCodeDataUrl ? (
-            <img src={device.qrCodeDataUrl} alt="Device QR Code" className="w-28 h-28 mx-auto" />
-          ) : (
-            <div className="w-28 h-28 bg-emerald-950 rounded-xl mx-auto flex items-center justify-center text-white">
-              <QrCode className="w-20 h-20" />
-            </div>
-          )}
+          <QRCodeSVG
+            value={`${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/device/${device?.assetNumber || assetNumber}`}
+            size={112}
+            bgColor="transparent"
+            fgColor="#10b981"
+            level="M"
+            className="mx-auto"
+          />
           <p className="text-[10px] text-slate-400 font-mono">Scan QR for instant status update</p>
         </div>
       </div>
@@ -177,6 +179,87 @@ export default function DeviceTrackingClient({ assetNumber }: { assetNumber: str
           })}
         </div>
       </div>
+
+      {/* TECHNICIAN REPAIR FEEDBACK CARD */}
+      {(device?.repairTickets?.length > 0 || device?.assessments?.length > 0) && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="glass-panel p-8 rounded-3xl border border-amber-200 dark:border-amber-800 shadow-xl space-y-5 bg-amber-50/40 dark:bg-amber-950/20"
+        >
+          <div className="flex items-center gap-2">
+            <Wrench className="w-5 h-5 text-amber-500" />
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Technician Repair Feedback</h3>
+          </div>
+
+          {/* Assessment Notes */}
+          {device?.assessments?.map((a: any, i: number) => (
+            <div key={i} className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800 space-y-2">
+              <div className="flex items-center gap-2 text-xs">
+                <User className="w-3.5 h-3.5 text-amber-500" />
+                <span className="font-bold text-slate-700 dark:text-slate-300">{a.technician?.name || 'Technician'}</span>
+                <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 font-extrabold uppercase text-[10px]">
+                  {a.recommendedAction}
+                </span>
+              </div>
+              {a.diagnosis && (
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                  <span className="font-extrabold text-slate-700 dark:text-slate-300">Diagnosis: </span>{a.diagnosis}
+                </p>
+              )}
+            </div>
+          ))}
+
+          {/* Repair Ticket Updates */}
+          {device?.repairTickets?.map((ticket: any, i: number) => (
+            <div key={i} className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="px-2.5 py-1 rounded-full bg-rose-100 dark:bg-rose-950 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 font-extrabold uppercase text-[10px]">
+                    {ticket.priority} Priority
+                  </span>
+                  <span className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-extrabold uppercase text-[10px]">
+                    {ticket.status?.replace(/_/g, ' ')}
+                  </span>
+                </div>
+                <span className="text-xs text-slate-500 font-medium">{ticket.technician?.name}</span>
+              </div>
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Issue: <span className="font-normal text-slate-600 dark:text-slate-400">{ticket.issue}</span>
+              </p>
+
+              {/* Ticket Updates Timeline */}
+              {ticket.updates && ticket.updates.length > 0 && (
+                <div className="space-y-2 pl-4 border-l-2 border-amber-300 dark:border-amber-700">
+                  {ticket.updates.map((u: any, j: number) => (
+                    <div key={j} className="text-xs space-y-0.5">
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
+                        <span className="font-extrabold text-slate-800 dark:text-white uppercase text-[10px]">{u.status}</span>
+                        {u.createdAt && (
+                          <span className="text-slate-400 text-[10px]">
+                            — {new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-slate-500 pl-4 font-medium">{u.message}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* No updates yet */}
+              {(!ticket.updates || ticket.updates.length === 0) && (
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-500">
+                  <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span>Repair is in progress. No updates logged yet by the technician.</span>
+                </div>
+              )}
+            </div>
+          ))}
+        </motion.div>
+      )}
     </div>
   );
 }

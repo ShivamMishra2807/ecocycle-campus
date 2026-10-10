@@ -67,10 +67,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setToken(savedToken);
         setUser(JSON.parse(savedUser));
       } catch {
-        setUser(DEMO_USERS['student@ecocycle.local']);
+        // Corrupted session — clear it, don't auto-login
+        localStorage.removeItem('ecocycle_token');
+        localStorage.removeItem('ecocycle_user');
+        setUser(null);
       }
     } else {
-      setUser(DEMO_USERS['student@ecocycle.local']);
+      // No saved session — user must log in
+      setUser(null);
     }
     setIsLoading(false);
   }, []);

@@ -4,6 +4,7 @@ import { AuthProvider } from '@/lib/authContext';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Toaster } from 'sonner';
+import HydrationFix from '@/components/HydrationFix';
 
 export const metadata: Metadata = {
   title: 'EcoCycle Campus — Circular E-Waste Collection, Repair, Reuse & Recycling Platform',
@@ -15,9 +16,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+    <HydrationFix />
+
   return (
-    <html lang="en" className="h-full">
-      <body className="h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
+
+    <html lang="en" className="h-full" suppressHydrationWarning>
+      <body suppressHydrationWarning className="h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
         <AuthProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
